@@ -22,17 +22,26 @@ def pattern_create(length):
 
 
 def pattern_offset(value, buflen):
+    offset_list = []
     if value.startswith('0x'):
-        value = struct.pack('<I', int(value, 16)).strip('\x00')
+        value = struct.pack('<I', int(value, 16))
+        value = value.decode("utf-8")
     pattern = pattern_create(buflen)
-    try:
-        return pattern.index(value)
-    except ValueError:
-        return 'Not found'
+    offset = -1
+    while offset < buflen:
+        try:
+            offset = pattern.index(value, offset + 1)
+            offset_list.append(hex(offset))
+        except ValueError:
+            break
+    if len(offset_list ) <= 0:
+        return 'not found'
+    else:
+        return offset_list
 
 
 def print_help():
-    print 'Usage: %s (create | offset) <value> <buflen>' % sys.argv[0]
+    print('Usage: {} (create | offset) <value> <buflen>'.format(sys.argv[0]))
 
 
 def main():
@@ -44,7 +53,7 @@ def main():
     num_value = sys.argv[2]
 
     if command == 'create':
-        print pattern_create(int(num_value))
+        print(pattern_create(int(num_value)))
     else:
         if len(sys.argv) == 4:
             try:
@@ -53,8 +62,8 @@ def main():
                 print_help()
                 sys.exit(254)
         else:
-            buflen = 8192
-        print pattern_offset(num_value, buflen)
+            buflen = 0x2000
+        print(pattern_offset(num_value, buflen))
 
 if __name__ == '__main__':
     main()
